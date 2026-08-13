@@ -40,10 +40,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff==0.5.1",
-    "black==24.4.2",
-    "pytest==8.2.2",
-    "pip-audit==2.7.3",
+    "ruff",
+    "black",
+    "pytest",
+    "pip-audit",
 ]
 
 [tool.ruff]
