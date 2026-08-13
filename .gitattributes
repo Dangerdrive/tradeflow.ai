@@ -1,0 +1,12 @@
+# Normaliza todos os arquivos de texto para LF (evita ruído de CRLF/LF)
+* text=auto eol=lf
+
+# Binários não devem ser tratados como texto
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.db binary
+*.joblib binary

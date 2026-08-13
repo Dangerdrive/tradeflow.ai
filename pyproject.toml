@@ -2,12 +2,12 @@
 name = "tradeflow"
 version = "0.1.0"
 description = "TradeFlow - análise e automação de trading com IA"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     # --- Configuração e validação ---
-    "pydantic==2.7.4",
-    "pydantic-settings==2.3.4",
-    "python-dotenv==1.0.1",
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
     # --- LLM / Agentes ---
     "openai==1.35.13",
     "langchain==0.2.7",
@@ -15,27 +15,27 @@ dependencies = [
     "langchain-community==0.2.7",
     "crewai==0.41.0",
     # --- Extração de documentos ---
-    "pdfplumber==0.11.2",
-    "PyPDF2==3.0.1",
+    "pdfplumber",
     "pytesseract==0.3.10",
     # --- RAG / Vector Store ---
     # chromadb <0.5.0 é exigido pela dependência embedchain do crewai
     "chromadb<0.5.0",
     # --- Análise preditiva ---
-    "pandas==2.2.2",
-    "scikit-learn==1.5.1",
-    "joblib==1.4.2",
+    "pandas",
+    "scikit-learn",
+    "joblib",
     # --- Banco relacional ---
-    "sqlalchemy==2.0.31",
-    "alembic==1.13.2",
-    "psycopg2-binary==2.9.9",
+    "sqlalchemy",
+    "alembic",
+    "psycopg2-binary",
     # --- API ---
-    "fastapi==0.111.0",
-    "uvicorn[standard]==0.30.1",
-    "python-multipart==0.0.9",
-    "slowapi==0.1.9",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "slowapi",
     # --- Interface ---
-    "streamlit==1.36.0",
+    "streamlit",
+    "pypdf>=4.3.1",
 ]
 
 [dependency-groups]
