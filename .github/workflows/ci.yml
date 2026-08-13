@@ -33,4 +33,6 @@ jobs:
         run: pytest
 
       - name: Security audit (pip-audit)
-        run: pip-audit
+        # PYSEC-2026-311 (chromadb) é aceita e documentada: sem versão fix
+        # publicada até 2026-08-13. Reavaliar a cada upgrade.
+        run: pip-audit --ignore-vuln PYSEC-2026-311

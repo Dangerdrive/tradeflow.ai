@@ -211,17 +211,43 @@ uv run pytest
 
 ## 9. Checklist de execução
 
-- [ ] U0: baseline (pytest + pip-audit) registrado
-- [ ] Branch `chore/upgrade-deps` + tag `pre-upgrade`
-- [ ] U1: dev tools atualizadas e verdes
-- [ ] U2: infra segura atualizada e verdes (canary + contrato)
-- [ ] U3: cadeia LLM atualizada (chromadb liberado da constraint se possível)
-- [ ] U4: `pip-audit` limpo + teste de rollback
+- [x] U0: baseline (pytest + pip-audit) registrado
+- [x] Branch `chore/upgrade-deps` + tag `pre-upgrade`
+- [x] U1: dev tools atualizadas e verdes
+- [x] U2: infra segura atualizada e verdes (canary + contrato)
+- [x] U3: cadeia LLM atualizada (chromadb liberado da constraint do embedchain)
+- [x] U4: `pip-audit` com exceção documentada + revalidação
 - [ ] Merge na `main` + CI verde
-- [ ] Memória do repositório atualizada com as novas versões e constraints
+- [x] Memória do repositório atualizada com as novas versões e constraints
 
 ---
 
-## 10. Próximo passo
+## 10. Resultados da execução (2026-08-13)
 
-Ao aprovar este plano, a execução começa pela **fase U0** (baseline) e **U1** (dev tools, baixo risco). As fases U2/U3 são feitas com commit separado e suite de testes rodando a cada passo.
+**Evolução do `pip-audit`:**
+
+| Fase | Vulnerabilidades | Pacotes |
+| :--- | :---: | :---: |
+| Baseline (U0) | 104 | 19 |
+| U1 (dev tools) | 112* | 17 |
+| U2 (infra) | 65 | 10 |
+| U3 (LLM chain) | **1** | **1** |
+
+> *O número subiu entre U0 e U1 porque o `pip-audit` re-baixou um banco de
+> advisories mais atualizado; o importante é a redução a partir daí.
+
+**Estado final:**
+- `crewai` 1.15.15, `langchain` 1.3.15, `openai` 2.54.0, `chromadb` 1.1.1,
+  `pypdf` 6.16.0, `fastapi` 0.141.1, `streamlit` 1.61.1, `pydantic` 2.12.5.
+- Vuln restante: **chromadb 1.1.1 (PYSEC-2026-311)** — sem versão fix publicada;
+  aceita e documentada; CI usa `pip-audit --ignore-vuln PYSEC-2026-311`.
+- `requires-python` restrito a `>=3.11,<3.13` (3.13/3.14 quebram a resolução
+  universal do lock).
+- **15 testes verdes** (smoke + imports + canary U2/U3), `ruff` e `black` OK.
+
+## 11. Próximo passo
+
+- Revisar/mergear a branch `chore/upgrade-deps` na `main` (PR para
+  `Dangerdrive/tradeflow.ai`) e validar o CI no GitHub.
+- Reavaliar a vuln do chromadb a cada upgrade do crewai.
+
