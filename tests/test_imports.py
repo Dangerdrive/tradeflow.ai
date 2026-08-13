@@ -32,7 +32,7 @@ MINIMOS: dict[str, tuple[int, ...]] = {
     "pandas": (2, 3),
     "scikit-learn": (1, 6),
     "pdfplumber": (0, 11, 5),
-    "pypdf": (4, 0),  # <6 até a Fase U3 (crewai/embedchain)
+    "pypdf": (6, 0),  # Fase U3 — livre da restrição do embedchain
     "python-multipart": (0, 0, 15),
     "python-dotenv": (1, 1),
     "alembic": (1, 14),
@@ -40,6 +40,14 @@ MINIMOS: dict[str, tuple[int, ...]] = {
     "pillow": (12, 0),
     "starlette": (0, 40),
     "uvicorn": (0, 32),
+    # --- Cadeia LLM (Fase U3) ---
+    "openai": (2, 0),
+    "langchain": (1, 0),
+    "langchain-core": (1, 0),
+    "langchain-openai": (1, 0),
+    "langchain-community": (0, 4),
+    "crewai": (1, 0),
+    "chromadb": (1, 0),
 }
 
 
@@ -78,6 +86,14 @@ def test_importacao_dos_modulos() -> None:
         "alembic",
         "slowapi",
         "starlette",
+        # --- Cadeia LLM (Fase U3) ---
+        "openai",
+        "langchain",
+        "langchain_core",
+        "langchain_openai",
+        "langchain_community",
+        "crewai",
+        "chromadb",
     ]
     for mod in modulos:
         assert importlib.import_module(mod) is not None, f"falhou import: {mod}"
