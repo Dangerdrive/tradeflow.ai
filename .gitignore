@@ -1,0 +1,28 @@
+# --- Ambiente e segredos ---
+.env
+.venv/
+venv/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Dados e artefatos (versionados com DVC / não versionados) ---
+data/*.db
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/chroma/*
+!data/chroma/.gitkeep
+models/*
+!models/.gitkeep
+
+# --- IDE / SO ---
+.idea/
+.vscode/
+.DS_Store
