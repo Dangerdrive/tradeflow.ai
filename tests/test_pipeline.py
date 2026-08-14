@@ -50,7 +50,9 @@ class _FakeClassificador:
             raise RuntimeError("índice indisponível")
         if self.sugestao:
             return [self.sugestao]
-        return [NcmSuggestion(ncm="8528.72.00", descricao="Televisor", score=0.9, aliquota=20.0)]
+        return [
+            NcmSuggestion(ncm="8528.72.00", descricao="Televisor", score=0.9, aliquota=20.0)
+        ]
 
 
 class _FakePreditor:
@@ -101,7 +103,6 @@ def test_pipeline_completo_persiste(db, tmp_path) -> None:
     assert resultado.importacao_id is not None
     assert "extracao_s" in resultado.metricas
 
-    # Registro persistido no banco.
     with get_engine(db).connect() as conn:
         total = conn.execute(Importacao.__table__.select()).fetchall()
     assert len(total) == 1
@@ -140,7 +141,6 @@ def test_pipeline_sem_preditor_segue_sem_prazo(db, tmp_path) -> None:
 
 
 def test_pipeline_atualiza_registro_existente(db, tmp_path) -> None:
-    # Cria um registro pendente antes (fluxo assíncrono da API).
     from storage.db import session_scope
 
     with session_scope() as sessao:
@@ -153,6 +153,27 @@ def test_pipeline_atualiza_registro_existente(db, tmp_path) -> None:
 
     with get_engine(db).connect() as conn:
         linhas = conn.execute(Importacao.__table__.select()).fetchall()
-    # O registro pendente foi atualizado (não criado outro).
     assert len(linhas) == 1
-    assert linhas[0][1] == "INV-2026-0842"  # numero_fatura atualizado? (depende do fluxo)
+    assert linhas[0][1] == "INV-2026-0842"
+
+
+def test_pipeline_merge_evita_duplicata_na_idempotencia(db, tmp_path) -> None:
+    """Upload de fatura já existente: placeholder é removido e o canônico atualizado."""
+    from storage.db import session_scope
+
+    r1 = _pipeline().process_pdf(tmp_path / "fatura.pdf")
+    id_canonico = r1.importacao_id
+
+    with session_scope() as sessao:
+        repo = ImportacaoRepository(sessao)
+        placeholder = repo.create(numero_fatura="UPLOAD-X", fornecedor="?")
+        id_placeholder = placeholder.id
+
+    r2 = _pipeline().process_pdf(tmp_path / "fatura.pdf", importacao_id=id_placeholder)
+
+    assert r2.importacao_id == id_canonico
+
+    with get_engine(db).connect() as conn:
+        linhas = conn.execute(Importacao.__table__.select()).fetchall()
+    assert len(linhas) == 1
+    assert linhas[0][0] == id_canonico

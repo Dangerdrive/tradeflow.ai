@@ -188,6 +188,9 @@ class TradeFlowPipeline:
                         existente = repo.find_by_fatura(invoice.numero_fatura, invoice.fornecedor)
                         if existente is not None and existente.id != importacao_id:
                             self._preencher(existente, invoice, ncm, prazo)
+                            # Força o carregamento dos itens do placeholder
+                            # para o cascade delete emitir o DELETE correto.
+                            _ = list(alvo.itens)
                             sessao.delete(alvo)
                             sessao.flush()
                             return repo.get(existente.id)
