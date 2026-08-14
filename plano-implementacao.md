@@ -4,6 +4,36 @@
 
 ---
 
+## ✅ Status de implementação (2026-08-14)
+
+MVP vertical **concluído** (Fases 0 → 1 → 2 → 4 → 3 → 5 → 6 → 7):
+
+| Fase | Status | Destaques |
+| :--- | :---: | :--- |
+| F0 — Fundação | ✅ | uv + pydantic-settings + logging JSON + CI verde |
+| F1 — Extração | ✅ | pdfplumber + LLM (retry/backoff) + regex fallback; golden 100% |
+| F2 — RAG NCM | ✅ | Embedder (OpenAI/Hash) + ChromaDB/InMemory; precision@3 93% |
+| F3 — Predição | ✅ | LinearRegression R²=0.952 (dataset sintético determinístico) |
+| F4 — Dados SQL | ✅ | SQLAlchemy + Alembic (downgrade OK) + repositórios |
+| F5 — Orquestração | ✅ | CrewAI (demo) + pipeline determinístico + worker assíncrono |
+| F6 — API REST | ✅ | FastAPI: upload 202, status, listagem; X-API-Key + rate limit |
+| F7 — Streamlit | ✅ | upload → resultados → revisão humana (Thin UI) |
+
+**Como rodar a demo:**
+```bash
+uv run python scripts/seed_db.py            # dados de exemplo
+uv run python scripts/build_ncm_index.py    # índice NCM persistente (opcional)
+uv run streamlit run ui/app.py              # dashboard (demo ponta a ponta)
+uv run uvicorn api.main:app --reload        # API REST (Swagger em /docs)
+uv run python prediction/train.py           # retreinar modelo de prazo
+```
+
+**Qualidade:** 77 testes, ruff/black limpos, `pip-audit` 0 vulns
+(exceção documentada: chromadb `PYSEC-2026-311` — todas as versões 1.x afetadas,
+sem fix publicado; mitigação: Chroma local, `trustremotecode=false`).
+
+---
+
 ## 1. Visão geral da arquitetura e fluxo de dados
 
 O TradeFlow é um pipeline de IA em 5 estágios: **receber** documentos → **extrair** dados → **classificar NCM** (RAG) → **prever** prazo/custo → **persistir e expor** os resultados.
