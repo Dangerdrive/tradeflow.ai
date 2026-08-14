@@ -42,6 +42,9 @@ class Importacao(Base):
     __table_args__ = (
         UniqueConstraint("numero_fatura", "fornecedor", name="uq_importacao_fatura_fornecedor"),
     )
+    # O rowcount do DELETE em SQLite é não confiável em cascade delete;
+    # desativa a checagem (o delete em si funciona — placeholder vira 404).
+    __mapper_args__ = {"confirm_deleted_rows": False}
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     numero_fatura: Mapped[str] = mapped_column(String(64), index=True)
