@@ -7,6 +7,7 @@ Trocar SQLite por PostgreSQL muda apenas ``DATABASE_URL`` (via
 from __future__ import annotations
 
 from collections.abc import Iterator
+from contextlib import contextmanager
 from functools import lru_cache
 
 from sqlalchemy import create_engine
@@ -45,6 +46,7 @@ def create_session(url: str | None = None) -> Session:
     return get_session_factory(url)()
 
 
+@contextmanager
 def session_scope(url: str | None = None) -> Iterator[Session]:
     """Contexto de sessão com commit/rollback automático."""
     sessao = create_session(url)
