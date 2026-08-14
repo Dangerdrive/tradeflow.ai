@@ -23,16 +23,20 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      # Os comandos usam `uv run` porque o setup-uv não ativa o venv por padrão
+      # (activate-environment=false), então `ruff`/`black`/`pytest`/`pip-audit`
+      # não ficam no PATH do runner.
+
       - name: Lint (ruff)
-        run: ruff check .
+        run: uv run ruff check .
 
       - name: Format check (black)
-        run: black --check .
+        run: uv run black --check .
 
       - name: Tests
-        run: pytest
+        run: uv run pytest
 
       - name: Security audit (pip-audit)
         # PYSEC-2026-311 (chromadb) é aceita e documentada: sem versão fix
         # publicada até 2026-08-13. Reavaliar a cada upgrade.
-        run: pip-audit --ignore-vuln PYSEC-2026-311
+        run: uv run pip-audit --ignore-vuln PYSEC-2026-311
