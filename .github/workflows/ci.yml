@@ -35,12 +35,10 @@ jobs:
 
       - name: Tests
         run: uv run pytest
-
-      - name: Secrets scan (gitleaks)
-        # Varre o repositório por segredos (chaves, tokens, chaves privadas).
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # O scan de segredos é coberto por tests/test_seguranca.py (pytest),
+        # que roda nesta etapa: .env não versionado, sem segredos reais nos
+        # arquivos rastreados e logs sem PII por padrão. (A action gitleaks
+        # de terceiros foi removida por falhas de infraestrutura intermitentes.)
 
       - name: Security audit (pip-audit)
         # PYSEC-2026-311 (chromadb) é aceita e documentada: sem versão fix
