@@ -4,12 +4,14 @@ Usa o client síncrono do pacote ``openai`` (v2.x). A extração retorna JSON
 que é validado contra um schema Pydantic — se inválido, tenta um reparo
 (pedir JSON válido novamente) antes de propagar o erro.
 
-Contenção de custos: modelo configurável via ``Settings.openai_model`` e
-``max_tokens`` limitado por chamada.
+Contenção de custos: modelo configurável via ``Settings.openai_model``,
+``max_tokens`` limitado por chamada e **cache em memória** por prompt (o mesmo
+documento não é re-enviado ao LLM em reprocessamentos idênticos).
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import time
@@ -52,6 +54,7 @@ class LlmClient:
         timeout_s: float = _DEFAULT_TIMEOUT_S,
         max_retries: int = _DEFAULT_MAX_RETRIES,
         backoff_base_s: float = _DEFAULT_BACKOFF_BASE_S,
+        use_cache: bool = True,
         chat_cls=None,
     ) -> None:
         self.model = model
@@ -60,6 +63,8 @@ class LlmClient:
         self.timeout_s = timeout_s
         self.max_retries = max_retries
         self.backoff_base_s = backoff_base_s
+        self.use_cache = use_cache
+        self._cache: dict[str, str] = {}
 
         if chat_cls is None:
             from langchain_openai import ChatOpenAI
@@ -76,7 +81,32 @@ class LlmClient:
     # ------------------------------------------------------------------ API
 
     def generate_text(self, prompt: str) -> str:
-        """Chama o LLM com retry/backoff e retorna o texto da resposta."""
+        """Chama o LLM com retry/backoff e retorna o texto da resposta.
+
+        Resultados idênticos (mesmo prompt) são servidos do cache em memória,
+        evitando re-cobrança de tokens em reprocessamentos.
+        """
+        chave = self._chave_cache(prompt)
+        if self.use_cache and chave in self._cache:
+            logger.debug("llm_cache_hit")
+            return self._cache[chave]
+
+        texto = self._chamar(prompt)
+        if self.use_cache:
+            self._cache[chave] = texto
+        return texto
+
+    def cache_clear(self) -> None:
+        """Limpa o cache em memória."""
+        self._cache.clear()
+
+    def cache_info(self) -> dict:
+        """Estatísticas do cache (para observabilidade)."""
+        return {"tamanho": len(self._cache)}
+
+    # ----------------------------------------------------------- internals
+
+    def _chamar(self, prompt: str) -> str:
         ultimo_erro: Exception | None = None
         for tentativa in range(self.max_retries + 1):
             try:
@@ -91,6 +121,10 @@ class LlmClient:
                 if tentativa < self.max_retries:
                     time.sleep(self.backoff_base_s * (2**tentativa))
         raise LlmError(f"LLM falhou após {self.max_retries + 1} tentativas") from ultimo_erro
+
+    @staticmethod
+    def _chave_cache(prompt: str) -> str:
+        return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
     def generate_structured(self, prompt: str, schema: type[T]) -> T:
         """Chama o LLM pedindo JSON e valida contra ``schema``.

@@ -138,6 +138,15 @@ cp .env.example .env
 
 > Todos os comandos rodam dentro do ambiente do projeto via `uv run`.
 
+### Setup rápido (tudo de uma vez)
+
+```bash
+bash scripts/setup.sh
+```
+
+Instala dependências, cria `.env`, aplica as migrações (Alembic), faz o seed,
+treina o modelo de prazo e constrói o índice NCM.
+
 ### Dashboard (Streamlit)
 
 ```bash
@@ -152,18 +161,29 @@ uv run uvicorn api.main:app --reload
 
 A documentação interativa fica em `http://localhost:8000/docs`.
 
-### Testes
+### Treinar o modelo / reconstruir o índice / seed
+
+```bash
+uv run python -m prediction.train          # modelo de prazo
+uv run python scripts/build_ncm_index.py   # índice NCM (ChromaDB)
+uv run python scripts/seed_db.py           # dados de demonstração
+```
+
+### Testes, lint, formatação e auditoria
 
 ```bash
 uv run pytest
-```
-
-### Lint, formatação e auditoria
-
-```bash
 uv run ruff check .
 uv run black --check .
-uv run pip-audit
+uv run pip-audit --ignore-vuln PYSEC-2026-311   # exceção documentada (chromadb)
+```
+
+### Avaliação de qualidade
+
+```bash
+uv run python scripts/evaluate_extraction.py   # precisão da extração (golden)
+uv run python scripts/evaluate_ncm.py          # precision@1/@3 do RAG
+uv run python scripts/estimar_custo_llm.py     # custo mensal estimado de LLM
 ```
 
 ---
@@ -211,19 +231,39 @@ O resultado é persistido com status `pendente` para **revisão humana** — ess
 
 ---
 
+## � Avaliação de qualidade
+
+| Componente | Métrica | Resultado | Meta |
+| :--- | :--- | :---: | :---: |
+| Extração (golden dataset) | documentos com 6/6 campos | **100%** | ≥ 90% |
+| RAG NCM | precision@3 | **93%** | ≥ 85% |
+| Modelo preditivo | R² / RMSE (teste) | **0.952 / 2.45** | R² > 0.8 |
+| Custo LLM | US$/documento (gpt-4o-mini) | **~US$ 0.0002** | — |
+
+## 📈 Monitoramento e retreino
+
+- **Drift de features** (`prediction/drift.py`): compara a distribuição de
+  `peso/valor/volumes` da produção com o baseline do treino (z-score > 3
+  aciona alerta de retreino).
+- **Cache de LLM** (`utils/llm.py`): prompts idênticos não são re-cobrados.
+- **Reavaliação do RAG**: rodar `scripts/evaluate_ncm.py` após atualizar a
+  Tabela TIPI; meta precision@3 ≥ 85%.
+
+---
+
 ## 🗺️ Roadmap
 
 | Fase | Descrição | Status |
 | :--- | :--- | :---: |
-| 0 | Fundação (estrutura, config, CI) | ⬜ |
-| 1 | Extração estruturada + OCR | ⬜ |
-| 2 | RAG para classificação NCM | ⬜ |
-| 3 | Modelo preditivo | ⬜ |
-| 4 | Camada de dados SQL | ⬜ |
-| 5 | Orquestração (CrewAI) | ⬜ |
-| 6 | API REST | ⬜ |
-| 7 | Dashboard Streamlit | ⬜ |
-| 8 | Hardening, avaliação e entrega | ⬜ |
+| 0 | Fundação (estrutura, config, CI) | ✅ |
+| 1 | Extração estruturada + OCR | ✅ |
+| 2 | RAG para classificação NCM | ✅ |
+| 3 | Modelo preditivo | ✅ |
+| 4 | Camada de dados SQL | ✅ |
+| 5 | Orquestração (CrewAI) | ✅ |
+| 6 | API REST | ✅ |
+| 7 | Dashboard Streamlit | ✅ |
+| 8 | Hardening, avaliação e entrega | ✅ |
 
 O **MVP vertical** (Fases 0 → 1 → 2 → 7) entrega a demo de ponta a ponta para a entrevista.
 
@@ -237,6 +277,9 @@ O **MVP vertical** (Fases 0 → 1 → 2 → 7) entrega a demo de ponta a ponta p
 - Fine-tuning de LLMs próprios.
 - Multi-tenancy e escala horizontal.
 - Integração real com Siscomex/DUIMP.
+- **chromadb `PYSEC-2026-311`**: todas as versões 1.x são afetadas e não há
+  fix publicado (atualizado 2026-08-14). Mitigação operacional: Chroma
+  bindado a localhost e `trustremotecode=false`. Reavaliar a cada upgrade do crewai.
 
 ---
 

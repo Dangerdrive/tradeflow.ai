@@ -36,6 +36,12 @@ jobs:
       - name: Tests
         run: uv run pytest
 
+      - name: Secrets scan (gitleaks)
+        # Varre o repositório por segredos (chaves, tokens, chaves privadas).
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Security audit (pip-audit)
         # PYSEC-2026-311 (chromadb) é aceita e documentada: sem versão fix
         # publicada até 2026-08-13. Reavaliar a cada upgrade.

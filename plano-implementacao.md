@@ -6,7 +6,7 @@
 
 ## ✅ Status de implementação (2026-08-14)
 
-MVP vertical **concluído** (Fases 0 → 1 → 2 → 4 → 3 → 5 → 6 → 7):
+MVP vertical **concluído** (Fases 0 → 1 → 2 → 4 → 3 → 5 → 6 → 7) + **Fase 8 (hardening)**:
 
 | Fase | Status | Destaques |
 | :--- | :---: | :--- |
@@ -18,6 +18,7 @@ MVP vertical **concluído** (Fases 0 → 1 → 2 → 4 → 3 → 5 → 6 → 7):
 | F5 — Orquestração | ✅ | CrewAI (demo) + pipeline determinístico + worker assíncrono |
 | F6 — API REST | ✅ | FastAPI: upload 202, status, listagem; X-API-Key + rate limit |
 | F7 — Streamlit | ✅ | upload → resultados → revisão humana (Thin UI) |
+| F8 — Hardening | ✅ | cache LLM, E2E, custo, drift, segredos (gitleaks), README + setup.sh, relatório |
 
 **Como rodar a demo:**
 ```bash
