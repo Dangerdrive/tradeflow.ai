@@ -50,9 +50,7 @@ class _FakeClassificador:
             raise RuntimeError("índice indisponível")
         if self.sugestao:
             return [self.sugestao]
-        return [
-            NcmSuggestion(ncm="8528.72.00", descricao="Televisor", score=0.9, aliquota=20.0)
-        ]
+        return [NcmSuggestion(ncm="8528.72.00", descricao="Televisor", score=0.9, aliquota=20.0)]
 
 
 class _FakePreditor:
