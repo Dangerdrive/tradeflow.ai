@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = 25
     allowed_document_extensions: tuple[str, ...] = (".pdf",)
 
+    # --- API REST (Fase 6) ---
+    # Chave de API (X-API-Key). Vazia = autenticação desabilitada (dev).
+    api_key: str = ""
+    # Rate limit no formato slowapi, ex.: "10/minute".
+    api_rate_limit: str = "10/minute"
+
 
 @lru_cache
 def get_settings() -> Settings:
