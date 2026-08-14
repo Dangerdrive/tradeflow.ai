@@ -1,0 +1,82 @@
+{
+  "invoice_001.pdf": {
+    "numero_fatura": "INV-2026-0842",
+    "fornecedor": "Tech Global Ltd.",
+    "valor_total_usd": 12850.4,
+    "peso_bruto_kg": 320.5,
+    "incoterm": "FOB",
+    "volumes": 12
+  },
+  "invoice_002.pdf": {
+    "numero_fatura": "FT-2026-1122",
+    "fornecedor": "Logística BR Import",
+    "valor_total_usd": 8900.0,
+    "peso_bruto_kg": 150.0,
+    "incoterm": "CIF",
+    "volumes": 5
+  },
+  "invoice_003.pdf": {
+    "numero_fatura": "INV-2026-0199",
+    "fornecedor": "Nordic Components AB",
+    "valor_total_usd": 3240.0,
+    "peso_bruto_kg": 88.0,
+    "incoterm": "DAP",
+    "volumes": 4
+  },
+  "invoice_004.pdf": {
+    "numero_fatura": "INV-2026-0311",
+    "fornecedor": "Asia Pacific Electronics",
+    "valor_total_usd": 22110.75,
+    "peso_bruto_kg": 745.2,
+    "incoterm": "CIF",
+    "volumes": 26
+  },
+  "invoice_005.pdf": {
+    "numero_fatura": "FT-2026-2055",
+    "fornecedor": "Indústrias Andinas",
+    "valor_total_usd": 5678.9,
+    "peso_bruto_kg": 210.0,
+    "incoterm": "EXW",
+    "volumes": 8
+  },
+  "invoice_006.pdf": {
+    "numero_fatura": "INV-2026-0440",
+    "fornecedor": "Rhein Machinery GmbH",
+    "valor_total_usd": 47500.0,
+    "peso_bruto_kg": 1240.0,
+    "incoterm": "FOB",
+    "volumes": 2
+  },
+  "invoice_007.pdf": {
+    "numero_fatura": "FT-2026-0777",
+    "fornecedor": "Têxtil Vale do Itajaí",
+    "valor_total_usd": 1890.6,
+    "peso_bruto_kg": 45.5,
+    "incoterm": "DDP",
+    "volumes": 3
+  },
+  "invoice_008.pdf": {
+    "numero_fatura": "INV-2026-0555",
+    "fornecedor": "Gulf Food Trading",
+    "valor_total_usd": 9412.3,
+    "peso_bruto_kg": 980.0,
+    "incoterm": "CFR",
+    "volumes": 40
+  },
+  "invoice_009.pdf": {
+    "numero_fatura": "INV-2026-0666",
+    "fornecedor": "Silicon Valley Components",
+    "valor_total_usd": 18200.0,
+    "peso_bruto_kg": 12.8,
+    "incoterm": "CIP",
+    "volumes": 1
+  },
+  "invoice_010.pdf": {
+    "numero_fatura": "FT-2026-0999",
+    "fornecedor": "Madeiras do Norte",
+    "valor_total_usd": 7350.0,
+    "peso_bruto_kg": 5600.0,
+    "incoterm": "FOB",
+    "volumes": 15
+  }
+}
