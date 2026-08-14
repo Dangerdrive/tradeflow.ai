@@ -50,11 +50,12 @@ _RE_INCOTERM = re.compile(
     r"\b(" + "|".join(sorted(INCOTERMS_2020, key=len, reverse=True)) + r")\b",
     re.IGNORECASE,
 )
-# Item: padrão genérico de linha "descricao ... qtd x valor".
+# Item: padrão "descricao - qtd un - USD valor" ou "descricao qtd x USD valor".
 _RE_ITEM = re.compile(
-    r"([A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 /.\-]{4,80}?)\s+"
-    r"(\d{1,5}(?:\.\d{3})*(?:,\d{2})?|\d{1,5}(?:\.\d{2})?)\s*(?:x|un|pc)?\s*"
-    r"(\d{1,5}(?:\.\d{3})*(?:,\d{2})?|\d{1,4}(?:\.\d{2})?)",
+    r"([A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 /.\-]{3,80}?)\s+"
+    r"(\d{1,5}(?:[.,]\d{3})*(?:,\d{1,2})?)\s*(?:x|un|pc|und|unid|cto)?\s*"
+    r"(?:[-]?\s*(?:USD|US\$|EUR)\s*)?"
+    r"(\d{1,5}(?:[.,]\d{3})*(?:,\d{2})?)",
     re.IGNORECASE,
 )
 
@@ -107,11 +108,16 @@ def extract_fields_regex(texto: str) -> InvoiceData:
     volumes = _busca(_RE_VOLUMES, "volumes")
     incoterm = _busca(_RE_INCOTERM, "incoterm")
 
-    itens = [
-        InvoiceItem(descricao=m.group(1).strip(), quantidade=1.0, valor=_para_float(m.group(3)))
-        for m in _RE_ITEM.finditer(texto)
-        if len(m.group(1).strip()) >= 4
-    ]
+    itens: list[InvoiceItem] = []
+    for m in _RE_ITEM.finditer(texto):
+        descricao = m.group(1).strip().rstrip("-").strip()
+        valor = _para_float(m.group(3))
+        # Descarta ruído: descrição curta/débil ou valor não positivo.
+        if valor <= 0 or len(descricao) < 4:
+            continue
+        if descricao.lower() in {"un", "usd", "eur", "total", "amount"}:
+            continue
+        itens.append(InvoiceItem(descricao=descricao, quantidade=1.0, valor=valor))
 
     # Moeda detectada junto ao valor total (ex.: "Total USD 1.234,50").
     moeda = "USD"
