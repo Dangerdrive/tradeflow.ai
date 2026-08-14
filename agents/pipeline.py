@@ -178,57 +178,66 @@ class TradeFlowPipeline:
             with session_scope() as sessao:
                 repo = ImportacaoRepository(sessao)
 
-                # Atualiza um registro existente (fluxo assíncrono) com tudo.
+                # Fluxo assíncrono: atualiza o registro placeholder informado.
                 if importacao_id is not None:
                     alvo = repo.get(importacao_id)
                     if alvo is not None:
-                        alvo.numero_fatura = invoice.numero_fatura
-                        alvo.fornecedor = invoice.fornecedor
-                        alvo.valor_total_usd = invoice.valor_total_usd
-                        alvo.peso_bruto_kg = invoice.peso_bruto_kg
-                        alvo.incoterm = invoice.incoterm.value
-                        alvo.volumes = invoice.volumes
-                        alvo.moeda = invoice.moeda
-                        alvo.payload_bruto = invoice.model_dump(mode="json")
-                        alvo.ncm_sugerido = ncm.ncm if ncm else None
-                        alvo.prazo_estimado_dias = prazo
-                        alvo.status = STATUS_CONCLUIDO
-                        alvo.itens.clear()
-                        for item in invoice.itens:
-                            alvo.itens.append(
-                                Item(
-                                    importacao_id=alvo.id,
-                                    ncm=item.ncm,
-                                    descricao=item.descricao,
-                                    quantidade=item.quantidade,
-                                    valor=item.valor,
-                                )
-                            )
+                        # Idempotência: se a fatura+fornecedor já existe em outro
+                        # registro canônico, atualiza o canônico e remove o
+                        # placeholder (evita conflito da constraint única).
+                        existente = repo.find_by_fatura(invoice.numero_fatura, invoice.fornecedor)
+                        if existente is not None and existente.id != importacao_id:
+                            self._preencher(existente, invoice, ncm, prazo)
+                            sessao.delete(alvo)
+                            sessao.flush()
+                            return repo.get(existente.id)
+                        self._preencher(alvo, invoice, ncm, prazo)
                         sessao.flush()
                         return repo.get(importacao_id)
 
-                # Idempotência pela chave fatura+fornecedor.
+                # Idempotência pela chave fatura+fornecedor (sem placeholder).
                 existente = repo.find_by_fatura(invoice.numero_fatura, invoice.fornecedor)
                 if existente is not None:
-                    repo.atualizar_resultado(
-                        existente.id,
-                        ncm_sugerido=ncm.ncm if ncm else None,
-                        prazo_estimado_dias=prazo,
-                        status=STATUS_CONCLUIDO,
-                    )
+                    self._preencher(existente, invoice, ncm, prazo)
                     return repo.get(existente.id)
 
                 importacao = repo.criar_de_invoice(invoice)
-                repo.atualizar_resultado(
-                    importacao.id,
-                    ncm_sugerido=ncm.ncm if ncm else None,
-                    prazo_estimado_dias=prazo,
-                    status=STATUS_CONCLUIDO,
-                )
+                self._preencher(importacao, invoice, ncm, prazo)
                 return importacao
         except Exception as exc:  # noqa: BLE001
             logger.error("pipeline_erro_persistencia", extra={"erro": str(exc)})
             return None
+
+    @staticmethod
+    def _preencher(
+        importacao: Importacao,
+        invoice: InvoiceData,
+        ncm: NcmSuggestion | None,
+        prazo: int | None,
+    ) -> None:
+        """Preenche o registro com os dados extraídos, NCM e prazo."""
+        importacao.numero_fatura = invoice.numero_fatura
+        importacao.fornecedor = invoice.fornecedor
+        importacao.valor_total_usd = invoice.valor_total_usd
+        importacao.peso_bruto_kg = invoice.peso_bruto_kg
+        importacao.incoterm = invoice.incoterm.value
+        importacao.volumes = invoice.volumes
+        importacao.moeda = invoice.moeda
+        importacao.payload_bruto = invoice.model_dump(mode="json")
+        importacao.ncm_sugerido = ncm.ncm if ncm else None
+        importacao.prazo_estimado_dias = prazo
+        importacao.status = STATUS_CONCLUIDO
+        importacao.itens.clear()
+        for item in invoice.itens:
+            importacao.itens.append(
+                Item(
+                    importacao_id=importacao.id,
+                    ncm=item.ncm,
+                    descricao=item.descricao,
+                    quantidade=item.quantidade,
+                    valor=item.valor,
+                )
+            )
 
 
 # ------------------------------------------------------------- factories

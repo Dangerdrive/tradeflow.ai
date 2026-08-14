@@ -35,10 +35,13 @@ def _processar(pdf_path: Path, importacao_id: int) -> None:
 
         pipeline = default_pipeline()
         resultado = pipeline.process_pdf(pdf_path, importacao_id=importacao_id)
+        # O pipeline pode ter movido o resultado para um registro canônico
+        # (idempotência), então usamos o id final retornado.
+        alvo = resultado.importacao_id or importacao_id
         if resultado.status == STATUS_CONCLUIDO:
-            _marcar(importacao_id, STATUS_CONCLUIDO)
+            _marcar(alvo, STATUS_CONCLUIDO)
         else:
-            _marcar(importacao_id, STATUS_ERRO, observacao=resultado.erro)
+            _marcar(alvo, STATUS_ERRO, observacao=resultado.erro)
     except Exception as exc:  # noqa: BLE001 — erro estrutural do worker
         logger.exception("worker_erro", extra={"importacao_id": importacao_id})
         _marcar(importacao_id, STATUS_ERRO, observacao=str(exc))

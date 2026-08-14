@@ -102,6 +102,12 @@ def test_e2e_api_upload_status(db, tmp_path, monkeypatch) -> None:
     # Impede o worker real; processamos de forma síncrona no teste.
     monkeypatch.setattr("jobs.worker.enfileirar_processamento", lambda *a, **k: None)
 
+    # Isolamento: limpa uploads de execuções anteriores (diretório compartilhado).
+    uploads = RAIZ / "data" / "raw" / "uploads"
+    uploads.mkdir(parents=True, exist_ok=True)
+    for f in uploads.glob("*.pdf"):
+        f.unlink()
+
     app = create_app(get_settings())
     with TestClient(app) as client:
         resp = client.post(
@@ -114,7 +120,6 @@ def test_e2e_api_upload_status(db, tmp_path, monkeypatch) -> None:
         # Processa o PDF salvo (worker simulado) sobre o registro criado.
         from jobs.worker import _processar
 
-        uploads = RAIZ / "data" / "raw" / "uploads"
         pdf_salvo = next(uploads.glob("*.pdf"))
         _processar(pdf_salvo, importacao_id)
 

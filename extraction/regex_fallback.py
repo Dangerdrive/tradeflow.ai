@@ -50,12 +50,14 @@ _RE_INCOTERM = re.compile(
     r"\b(" + "|".join(sorted(INCOTERMS_2020, key=len, reverse=True)) + r")\b",
     re.IGNORECASE,
 )
-# Item: padrão "descricao - qtd un - USD valor" ou "descricao qtd x USD valor".
+# Item: padrão estrito "descricao - qtd un - USD valor".
+# Exige unidade (x/un/pc/und...) E moeda (USD/EUR) — evita falsos positivos.
+# Usa [ \t] (não \s) para nunca cruzar quebras de linha.
 _RE_ITEM = re.compile(
-    r"([A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 /.\-]{3,80}?)\s+"
-    r"(\d{1,5}(?:[.,]\d{3})*(?:,\d{1,2})?)\s*(?:x|un|pc|und|unid|cto)?\s*"
-    r"(?:[-]?\s*(?:USD|US\$|EUR)\s*)?"
-    r"(\d{1,5}(?:[.,]\d{3})*(?:,\d{2})?)",
+    r"([A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 /.\-%\"']{3,80}?)"
+    r"[ \t]*[-–]?[ \t]*(\d{1,5}(?:[.,]\d{3})*(?:,\d{1,2})?)"
+    r"[ \t]*(?:x|un|pc|und|unid|pct|par|cto)\b[ \t]*[-–]?[ \t]*"
+    r"(?:USD|US\$|EUR)[ \t]*(\d{1,5}(?:[.,]\d{3})*(?:,\d{2})?)",
     re.IGNORECASE,
 )
 
