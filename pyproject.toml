@@ -49,6 +49,8 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Migrações Alembic são autogeradas — não seguir o style do projeto.
+extend-exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM"]
