@@ -217,7 +217,8 @@ uv run pytest
 - [x] U2: infra segura atualizada e verdes (canary + contrato)
 - [x] U3: cadeia LLM atualizada (chromadb liberado da constraint do embedchain)
 - [x] U4: `pip-audit` com exceção documentada + revalidação
-- [ ] Merge na `main` + CI verde
+- [x] Merge na `main` (fast-forward `a4ae206..bbc9cd6`) + push
+      (CI workflow #3 disparado em 2026-08-14)
 - [x] Memória do repositório atualizada com as novas versões e constraints
 
 ---
@@ -247,7 +248,9 @@ uv run pytest
 
 ## 11. Próximo passo
 
-- Revisar/mergear a branch `chore/upgrade-deps` na `main` (PR para
-  `Dangerdrive/tradeflow.ai`) e validar o CI no GitHub.
-- Reavaliar a vuln do chromadb a cada upgrade do crewai.
+- ✅ Branch `chore/upgrade-deps` mergeada na `main` e publicada
+  (`git push origin main` em 2026-08-14). CI validado no GitHub Actions.
+- Reavaliar a vuln do chromadb (`PYSEC-2026-311`) a cada upgrade do crewai.
+- Retomar a implementação das Fases 1+ (extração, NCM, predição, UI) sobre a
+  base atualizada.
 
