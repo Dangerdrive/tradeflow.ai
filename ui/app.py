@@ -9,8 +9,12 @@ Uso:
 
 from __future__ import annotations
 
+import sys
 import tempfile
 from pathlib import Path
+
+# Streamlit roda `ui/app.py` com o diretório `ui/` no path — garante a raiz.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import streamlit as st
 
@@ -87,7 +91,7 @@ def _secao_importacoes() -> None:
             }
             for r in registros
         ],
-        use_container_width=True,
+        width="stretch",
     )
 
 
